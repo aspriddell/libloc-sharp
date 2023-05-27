@@ -18,9 +18,9 @@ using SharpCompress.Compressors.Xz;
 
 namespace libloc.Access
 {
-    internal class LocationDatabaseAccessor : ILocationDbAccessor, IHostedService, IDisposable
+    internal class LocationDbAccessor : ILocationDbAccessor, IHostedService, IDisposable
     {
-        private readonly ILogger<LocationDatabaseAccessor> _logger;
+        private readonly ILogger<LocationDbAccessor> _logger;
         private readonly IConfiguration _configuration;
         private readonly AsyncReaderWriterLock _lock;
         private readonly IDisposable _initialLock;
@@ -29,7 +29,7 @@ namespace libloc.Access
         private ILocationDatabase _database;
         private Timer _fetchTimer;
 
-        public LocationDatabaseAccessor(ILogger<LocationDatabaseAccessor> logger, IConfiguration configuration, ApiClient client)
+        public LocationDbAccessor(ILogger<LocationDbAccessor> logger, IConfiguration configuration, ApiClient client)
         {
             _logger = logger;
             _client = client;
