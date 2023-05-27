@@ -18,7 +18,7 @@ using SharpCompress.Compressors.Xz;
 
 namespace libloc.Access
 {
-    internal class LocationDatabaseAccessor : IDatabaseAccessor, IHostedService, IDisposable
+    internal class LocationDatabaseAccessor : ILocationDbAccessor, IHostedService, IDisposable
     {
         private readonly ILogger<LocationDatabaseAccessor> _logger;
         private readonly IConfiguration _configuration;
@@ -48,6 +48,14 @@ namespace libloc.Access
             using (await _lock.ReaderLockAsync().ConfigureAwait(false))
             {
                 return action.Invoke(_database);
+            }
+        }
+
+        public async Task<T> PerformAsync<T>(Func<ILocationDatabase, Task<T>> action)
+        {
+            using (await _lock.ReaderLockAsync().ConfigureAwait(false))
+            {
+                return await action.Invoke(_database);
             }
         }
 

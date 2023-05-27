@@ -7,8 +7,10 @@ using libloc.Abstractions;
 
 namespace libloc.Access
 {
-    public interface IDatabaseAccessor
+    public interface ILocationDbAccessor
     {
         Task<T> PerformAsync<T>(Func<ILocationDatabase, T> action);
+
+        Task<T> PerformAsync<T>(Func<ILocationDatabase, Task<T>> action);
     }
 }
