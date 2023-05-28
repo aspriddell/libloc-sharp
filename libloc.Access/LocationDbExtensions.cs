@@ -2,7 +2,6 @@
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace libloc.Access
 {
@@ -15,8 +14,10 @@ namespace libloc.Access
         /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
         public static IServiceCollection AddLocationDb(this IServiceCollection services)
         {
-            services.AddSingleton<ILocationDbAccessor, LocationDbAccessor>();
-            services.AddHostedService(s => (IHostedService)s.GetRequiredService<ILocationDbAccessor>());
+            services.AddSingleton<LocationDbAccessor>();
+            services.AddSingleton<ILocationDbAccessor>(s => s.GetRequiredService<LocationDbAccessor>());
+
+            services.AddHostedService(s => s.GetRequiredService<LocationDbAccessor>());
 
             return services;
         }

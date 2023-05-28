@@ -41,7 +41,7 @@ namespace libloc.Access
 
         private const string DatabaseName = "location-{0}.db";
 
-        private string DatabaseStorageRoot => _configuration["LocationDb:StorageRoot"];
+        private string DatabaseStorageRoot => _configuration["LocationDb:StorageRoot"] ?? ".";
 
         public async Task<T> PerformAsync<T>(Func<ILocationDatabase, T> action)
         {
@@ -75,30 +75,39 @@ namespace libloc.Access
                     var version = (ulong)(response.Content.Headers.LastModified ?? DateTime.UtcNow).Subtract(DateTime.UnixEpoch).TotalSeconds;
 
                     _logger.LogInformation("New location.db discovered, writing version {ver} to disk", version);
-                    await using var destinationStream = new FileStream(string.Format(DatabaseName, version), FileMode.Create, FileAccess.Write, FileShare.None, 8192, FileOptions.Asynchronous);
 
                     try
                     {
-                        await using var content = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                        await using var xzStream = new XZStream(content);
+                        await using var tempStream = new FileStream(Path.GetTempFileName(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.DeleteOnClose);
 
                         var stopwatch = new Stopwatch();
 
-                        stopwatch.Start();
+                        // buffer network stream to temp file stream
+                        await using (var content = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
+                        {
+                            stopwatch.Start();
+                            await content.CopyToAsync(tempStream).ConfigureAwait(false);
+                        }
 
-                        // copy deflated stream to destination file
-                        await xzStream.CopyToAsync(destinationStream).ConfigureAwait(false);
+                        stopwatch.Stop();
+                        tempStream.Seek(0, SeekOrigin.Begin);
+
+                        _logger.LogInformation("location.db written to temp file successfully (in {x:0.00} seconds)", stopwatch.Elapsed.TotalSeconds);
+
+                        // create an XZStream over the temp stream and write to the destination
+                        await using (var xzStream = new XZStream(tempStream))
+                        await using (var destinationStream = new FileStream(string.Format(DatabaseName, version), FileMode.Create, FileAccess.Write, FileShare.None, 8192, FileOptions.Asynchronous))
+                        {
+                            stopwatch.Restart();
+                            await xzStream.CopyToAsync(destinationStream).ConfigureAwait(false);
+                        }
 
                         stopwatch.Stop();
                         _logger.LogInformation("location.db written to disk in {x} seconds", stopwatch.Elapsed.TotalSeconds.ToString("0.###"));
                     }
                     catch (Exception e)
                     {
-                        await destinationStream.DisposeAsync().ConfigureAwait(false);
-                        File.Delete(destinationStream.Name);
-
                         _logger.LogWarning("location.db download failed - {message}", e.Message);
-
                         return false;
                     }
 
