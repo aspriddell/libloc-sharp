@@ -11,29 +11,28 @@ namespace libloc.V1.Collections
 {
     internal abstract class DatabaseV1Collection<T> : IEnumerable<T>, IDisposable where T : struct
     {
-        protected readonly MemoryMappedViewAccessor View;
-
+        private readonly MemoryMappedViewAccessor _view;
         private readonly int _entitySize;
 
         protected DatabaseV1Collection(MemoryMappedViewAccessor view)
         {
             _entitySize = Unsafe.SizeOf<T>();
+            _view = view;
 
-            View = view;
-            Count = (int)View.Capacity / _entitySize;
+            Count = (int)_view.Capacity / _entitySize;
         }
 
         public int Count { get; }
 
         internal protected T ElementAt(uint index)
         {
-            View.Read(index * _entitySize, out T data);
+            _view.Read(index * _entitySize, out T data);
             return data;
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return new ViewEnumerator<T>(View);
+            return new ViewEnumerator<T>(_view);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -43,7 +42,7 @@ namespace libloc.V1.Collections
 
         public virtual void Dispose()
         {
-            View.Dispose();
+            _view.Dispose();
         }
     }
 }
