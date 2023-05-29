@@ -43,6 +43,14 @@ namespace libloc.Access
 
         private string DatabaseStorageRoot => _configuration["LocationDb:StorageRoot"] ?? ".";
 
+        public async Task PerformAsync(Func<ILocationDatabase, Task> action)
+        {
+            using (await _lock.ReaderLockAsync().ConfigureAwait(false))
+            {
+                await action.Invoke(_database);
+            }
+        }
+
         public async Task<T> PerformAsync<T>(Func<ILocationDatabase, T> action)
         {
             using (await _lock.ReaderLockAsync().ConfigureAwait(false))

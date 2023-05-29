@@ -9,8 +9,9 @@ namespace libloc.Access
 {
     public interface ILocationDbAccessor
     {
-        Task<T> PerformAsync<T>(Func<ILocationDatabase, T> action);
+        Task PerformAsync(Func<ILocationDatabase, Task> action);
 
+        Task<T> PerformAsync<T>(Func<ILocationDatabase, T> action);
         Task<T> PerformAsync<T>(Func<ILocationDatabase, Task<T>> action);
     }
 }
