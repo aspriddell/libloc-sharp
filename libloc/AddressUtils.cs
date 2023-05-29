@@ -10,15 +10,15 @@ namespace libloc
     internal static class AddressUtils
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static int GetAddressBit(Span<byte> addressBytes, int depth)
-        {
-            return (addressBytes[depth / 8] >> (7 - depth % 8)) & 1;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void SetAddressBit(Span<byte> addressBytes, int depth, int value)
         {
             addressBytes[depth / 8] ^= (byte)((-value ^ addressBytes[depth / 8]) & (1 << (7 - depth % 8)));
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static int GetAddressBit(ReadOnlySpan<byte> addressBytes, int depth)
+        {
+            return (addressBytes[depth / 8] >> (7 - depth % 8)) & 1;
         }
 
         public static AddressFamily GetAddressFamily(ReadOnlySpan<byte> addressBytes)
