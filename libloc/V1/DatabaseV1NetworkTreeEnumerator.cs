@@ -16,14 +16,17 @@ namespace libloc.V1
         private readonly AddressFamily? _family;
 
         private readonly byte[] _networkAddress = new byte[16];
-        private readonly HashSet<uint> _visitedNetworks = new();
+
+        private readonly HashSet<uint> _visitedNetworks;
         private readonly Stack<NodeStackItem> _networkStack = new(256);
 
         public DatabaseV1NetworkTreeEnumerator(DatabaseV1NetworkTree tree, DatabaseV1Networks networks, AddressFamily? family)
         {
+            _family = family;
             _networkTree = tree;
             _networks = networks;
-            _family = family;
+
+            _visitedNetworks = new HashSet<uint>(_networks.Count);
 
             Reset();
         }
