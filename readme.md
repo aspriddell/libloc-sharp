@@ -5,7 +5,7 @@ A version of IPFire's libloc library rewritten for C#
 This is a rewritten version of libloc (an IP address database used by IPFire firewall software to screen network traffic)
 along with an additional library, `libloc.Access`, that enables the database to be loaded as a hosted service, enabling automatic database updates and access control.
 
-The core libloc project has been written to require no 3rd party libraries and has most of the expected read functionality.
+The core libloc project has been written to require a single 3rd party library (IPNetwork) and has most of the expected read functionality.
 
 ### Usage (libloc)
 The libloc `DatabaseLoader.LoadFromFile(string path)` returns an `ILocationDatabase` if the database was successfully loaded in. Accessing different features of the database can then be done through this instance:
