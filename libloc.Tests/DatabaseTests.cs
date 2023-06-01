@@ -39,7 +39,7 @@ namespace libloc.Tests
 
             Assert.IsNotNull(addressInfo);
             Assert.That(addressInfo.ASN, Is.EqualTo(expectedAs));
-            Assert.That(addressInfo.FirstAddress, Is.EqualTo(IPAddress.Parse(expectedStartBlock).MapToIPv6()));
+            Assert.That(addressInfo.Network.FirstUsable, Is.EqualTo(IPAddress.Parse(expectedStartBlock).MapToIPv6()));
         }
 
         [TestCase("10.11.12.13")]
