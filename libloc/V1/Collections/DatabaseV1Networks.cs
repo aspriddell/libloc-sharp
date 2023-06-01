@@ -18,23 +18,16 @@ namespace libloc.V1.Collections
         {
         }
 
-        public IDatabaseNetwork this[uint index] => FromSource(ElementAt(index), IPAddress.None, IPAddress.None, 0);
+        public IDatabaseNetwork this[uint index] => FromSource(ElementAt(index), null);
 
         internal DatabaseNetwork CreateWithPrefix(uint index, Span<byte> v6AddressBytes, int prefix)
         {
-            var networkInfo = ElementAt(index);
-            var (firstAddress, lastAddress) = CalculateAddressRange(v6AddressBytes, prefix);
-
-            return FromSource(networkInfo, firstAddress, lastAddress, prefix);
-        }
-
-        internal static (IPAddress start, IPAddress end) CalculateAddressRange(ReadOnlySpan<byte> v6AddressBytes, int prefix)
-        {
             Debug.Assert(v6AddressBytes.Length == 16);
+
+            var networkInfo = ElementAt(index);
 
             Span<byte> bitmask = stackalloc byte[v6AddressBytes.Length];
             Span<byte> firstAddressBytes = stackalloc byte[v6AddressBytes.Length];
-            Span<byte> lastAddressBytes = stackalloc byte[v6AddressBytes.Length];
 
             for (int i = prefix, j = 0; i > 0; i -= 8, j++)
             {
@@ -45,21 +38,18 @@ namespace libloc.V1.Collections
             {
                 // perform AND to get first address
                 firstAddressBytes[i] = (byte)(v6AddressBytes[i] & bitmask[i]);
-
-                // perform OR to get last address
-                lastAddressBytes[i] = (byte)(v6AddressBytes[i] | ~bitmask[i]);
             }
 
-            return (new IPAddress(firstAddressBytes), new IPAddress(lastAddressBytes));
+            return FromSource(networkInfo, IPNetwork.Parse(new IPAddress(firstAddressBytes), new IPAddress(bitmask)));
         }
 
-        private unsafe DatabaseNetwork FromSource(DatabaseSourceNetwork source, IPAddress firstAddress, IPAddress lastAddress, int prefixLength)
+        private unsafe DatabaseNetwork FromSource(DatabaseSourceNetwork source, IPNetwork network)
         {
             var correctedAsn = BinaryUtils.EnsureEndianness(source.asn);
             var correctedFlags = BinaryUtils.EnsureEndianness(source.flags);
             var countryCode = Encoding.ASCII.GetString(source.country_code, 2);
 
-            return new DatabaseNetwork(firstAddress, lastAddress, prefixLength, countryCode, correctedAsn, (NetworkFlags)correctedFlags);
+            return new DatabaseNetwork(network, countryCode, correctedAsn, (NetworkFlags)correctedFlags);
         }
     }
 }
