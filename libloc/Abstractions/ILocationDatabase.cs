@@ -23,6 +23,6 @@ namespace libloc.Abstractions
         ICountryDatabase Countries { get; }
 
         IAddressLocatedNetwork ResolveAddress(IPAddress address);
-        IEnumerator<IAddressLocatedNetwork> GetEnumerator(AddressFamily family);
+        IEnumerator<IAddressLocatedNetwork> GetEnumerator(AddressFamily family, bool flattened);
     }
 }

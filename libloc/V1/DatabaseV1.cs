@@ -117,14 +117,15 @@ namespace libloc.V1
             _mmdb.Dispose();
         }
 
-        public IEnumerator<IAddressLocatedNetwork> GetEnumerator(AddressFamily addressFamily)
+        public IEnumerator<IAddressLocatedNetwork> GetEnumerator(AddressFamily addressFamily, bool flattened)
         {
             if (addressFamily is not AddressFamily.InterNetwork and not AddressFamily.InterNetworkV6)
             {
                 throw new ArgumentException($"Only {nameof(AddressFamily.InterNetwork)} or {nameof(AddressFamily.InterNetworkV6)} can be used as a filter");
             }
 
-            return new DatabaseV1NetworkTreeEnumerator(_networkTree, _networks, addressFamily);
+            var treeEnumerator = new DatabaseV1NetworkTreeEnumerator(_networkTree, _networks, addressFamily);
+            return flattened ? new DatabaseV1FlattenedNetworkTreeEnumerator(treeEnumerator) : treeEnumerator;
         }
 
         public IEnumerator<IAddressLocatedNetwork> GetEnumerator()
