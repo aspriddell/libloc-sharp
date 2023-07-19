@@ -1,4 +1,7 @@
 # libloc-sharp
+[![DragonFruit Discord](https://img.shields.io/discord/482528405292843018?label=Discord)](https://discord.gg/VA26u5Z)
+![GitHub Latest Release)](https://img.shields.io/github/v/release/aspriddell/libloc-sharp?logo=github)
+
 A version of IPFire's libloc library rewritten for C#
 
 ## Overview
@@ -8,6 +11,8 @@ along with an additional library, `libloc.Access`, that enables the database to 
 The core libloc project has been written to require a single 3rd party library (IPNetwork) and has most of the expected read functionality.
 
 ### Usage (libloc)
+[![Latest Nuget](https://img.shields.io/nuget/v/libloc?label=libloc&logo=nuget)](https://nuget.org/packages/libloc)
+
 The libloc `DatabaseLoader.LoadFromFile(string path)` returns an `ILocationDatabase` if the database was successfully loaded in. Accessing different features of the database can then be done through this instance:
 
 - `ILocationDatabase.AS` provides a database of Autonomous Systems, where the entire collection can be accessed, or a specific entry can be loaded by ASN
@@ -28,6 +33,7 @@ var asInfo = database.AS[networkInfo.ASN];
 ```
 
 ### Usage (libloc.Access)
+[![Latest Nuget (libloc.Access)](https://img.shields.io/nuget/v/libloc.Access?label=libloc.Access&logo=nuget)](https://nuget.org/packages/libloc.Access)
 
 There are a few things to note when using `libloc.Access`:
 
