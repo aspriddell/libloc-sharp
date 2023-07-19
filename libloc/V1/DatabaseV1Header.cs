@@ -51,7 +51,6 @@ namespace libloc.V1
         public ushort signature2_length;
 
         public fixed byte signature1[SignatureMaxLength];
-
         public fixed byte signature2[SignatureMaxLength];
 
         // Add some padding for future extensions

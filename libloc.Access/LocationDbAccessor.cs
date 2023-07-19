@@ -146,6 +146,8 @@ namespace libloc.Access
                     {
                         var newDatabase = DatabaseLoader.LoadFromFile(dbFile);
 
+                        _logger.LogInformation("Loaded location db {file}", Path.GetFileName(dbFile));
+
                         _database?.Dispose();
                         _database = newDatabase;
 
@@ -170,6 +172,8 @@ namespace libloc.Access
 
         private async Task PerformUpdate()
         {
+            _logger.LogInformation("Performing location database update");
+
             if (await DownloadLatestDatabase().ConfigureAwait(false))
             {
                 await LoadLatestDatabase().ConfigureAwait(false);
@@ -182,7 +186,7 @@ namespace libloc.Access
             {
                 // load from disk
                 var dbLoaded = await LoadLatestDatabase(false).ConfigureAwait(false);
-                var requireNewDb = !dbLoaded;
+                var initialTimeout = dbLoaded ? TimeSpan.Zero : TimeSpan.FromHours(24);
 
                 while (!dbLoaded)
                 {
@@ -197,8 +201,7 @@ namespace libloc.Access
                     }
                 }
 
-                var initialTimeout = requireNewDb ? TimeSpan.FromDays(24) : TimeSpan.Zero;
-                _fetchTimer = new Timer(_ => PerformUpdate(), null, initialTimeout, TimeSpan.FromDays(1));
+                _fetchTimer = new Timer(_ => PerformUpdate(), null, initialTimeout, TimeSpan.FromHours(24));
             }
         }
 
