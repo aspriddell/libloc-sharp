@@ -101,17 +101,20 @@ namespace libloc.Access
                         tempStream.Seek(0, SeekOrigin.Begin);
 
                         _logger.LogInformation("location.db written to temp file successfully (in {x:0.00} seconds)", stopwatch.Elapsed.TotalSeconds);
+                        var databaseFileLocation = Path.Combine(DatabaseStorageRoot, string.Format(DatabaseName, version));
 
                         // create an XZStream over the temp stream and write to the destination
                         await using (var xzStream = new XZStream(tempStream))
-                        await using (var destinationStream = new FileStream(string.Format(DatabaseName, version), FileMode.Create, FileAccess.Write, FileShare.None, 8192, FileOptions.Asynchronous))
+                        await using (var destinationStream = new FileStream(databaseFileLocation, FileMode.Create, FileAccess.Write, FileShare.None, 8192, FileOptions.Asynchronous))
                         {
                             stopwatch.Restart();
+
                             await xzStream.CopyToAsync(destinationStream).ConfigureAwait(false);
+                            await destinationStream.FlushAsync().ConfigureAwait(false);
                         }
 
                         stopwatch.Stop();
-                        _logger.LogInformation("location.db written to disk in {x} seconds", stopwatch.Elapsed.TotalSeconds.ToString("0.###"));
+                        _logger.LogInformation("location.db written to disk (location {dir}) in {x} seconds", databaseFileLocation, stopwatch.Elapsed.TotalSeconds.ToString("0.###"));
                     }
                     catch (Exception e)
                     {
