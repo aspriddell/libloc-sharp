@@ -1,0 +1,26 @@
+name: Code Quality
+on: [ pull_request, push ]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "6.0.x"
+
+      - name: Restore Project/Tools
+        run: |
+          dotnet restore
+          dotnet tool install --global NVika
+          dotnet tool install --global JetBrains.ReSharper.GlobalTools
+
+      - name: Restore Packages
+        run: dotnet restore
+
+      - name: InspectCode
+        run: jb inspectcode libloc.sln --output=inspectcodereport.xml --verbosity=WARN --no-build
+
+      - name: Process Report
+        run: nvika parsereport inspectcodereport.xml
