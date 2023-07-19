@@ -1,4 +1,8 @@
 # libloc-sharp
+[![Latest Nuget](https://img.shields.io/nuget/v/libloc?label=libloc&logo=nuget)](https://nuget.org/packages/libloc)
+[![Latest Nuget (libloc.Access)](https://img.shields.io/nuget/v/libloc.Access?label=libloc.Access&logo=nuget)](https://nuget.org/packages/libloc.Access)
+[![DragonFruit Discord](https://img.shields.io/discord/482528405292843018?label=Discord)](https://discord.gg/VA26u5Z)
+
 A version of IPFire's libloc library rewritten for C#
 
 ## Overview
