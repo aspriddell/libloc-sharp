@@ -1,0 +1,24 @@
+<Project>
+
+    <PropertyGroup>
+        <Title>libloc-sharp</Title>
+        <IsPackable>true</IsPackable>
+        <Authors>Albie Spriddell</Authors>
+
+        <PackageIcon>icon.jpg</PackageIcon>
+        <PackageTags>geoip, libloc, ipfire, ip, ip2location</PackageTags>
+        <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
+
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+
+        <RepositoryType>Git</RepositoryType>
+        <RepositoryUrl>https://github.com/aspriddell/libloc-sharp</RepositoryUrl>
+        <PackageProjectUrl>https://github.com/aspriddell/libloc-sharp</PackageProjectUrl>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\icon.jpg" Pack="true" PackagePath="."/>
+    </ItemGroup>
+
+</Project>
