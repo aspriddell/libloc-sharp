@@ -1,12 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <PackageId>libloc</PackageId>
         <TargetFramework>net6.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <Description>A version of IPFire's libloc library rewritten for C#</Description>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="IPNetwork2" Version="2.6.573" />
+        <PackageReference Include="IPNetwork2" Version="2.6.573"/>
     </ItemGroup>
+
+    <Import Project="../Nuget.props"/>
 
 </Project>
