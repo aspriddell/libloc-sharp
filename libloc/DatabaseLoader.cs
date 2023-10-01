@@ -14,10 +14,20 @@ namespace libloc
     {
         private const string MagicName = "LOCDBXX";
 
-        public static unsafe ILocationDatabase LoadFromFile(string path)
+        /// <summary>
+        /// Loads a location.db file from the filesystem, using the provided path.
+        /// </summary>
+        public static ILocationDatabase LoadFromFile(string path)
         {
-            var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 0x1000, FileOptions.RandomAccess);
-            var file = MemoryMappedFile.CreateFromFile(fileStream, null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, false);
+            return LoadFromStream(new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 0x1000, FileOptions.RandomAccess));
+        }
+
+        /// <summary>
+        /// Loads a location.db file from the provided stream.
+        /// </summary>
+        public static unsafe ILocationDatabase LoadFromStream(FileStream stream)
+        {
+            var file = MemoryMappedFile.CreateFromFile(stream, null, 0, MemoryMappedFileAccess.Read, HandleInheritability.None, false);
 
             try
             {
@@ -46,7 +56,6 @@ namespace libloc
             {
                 // dispose before throwing
                 file.Dispose();
-
                 throw;
             }
         }
