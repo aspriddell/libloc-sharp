@@ -65,7 +65,7 @@ namespace libloc.V1
                 }
 
                 // check if network is the right family
-                if (AddressUtils.GetAddressFamily(_networkAddress) != _family)
+                if (_family.HasValue && AddressUtils.GetAddressFamily(_networkAddress) != _family)
                 {
                     continue;
                 }
