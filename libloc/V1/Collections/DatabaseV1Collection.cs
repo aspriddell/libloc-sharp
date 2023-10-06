@@ -24,7 +24,7 @@ namespace libloc.V1.Collections
 
         public int Count { get; }
 
-        internal protected T ElementAt(uint index)
+        internal protected T ElementAt(int index)
         {
             _view.Read(index * _entitySize, out T data);
             return data;
