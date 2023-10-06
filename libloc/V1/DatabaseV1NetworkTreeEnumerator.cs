@@ -47,7 +47,7 @@ namespace libloc.V1
                 AddressUtils.SetAddressBit(_networkAddress, node.depth > 0 ? node.depth - 1 : 0, node.nodeOne ? 1 : 0);
 
                 // get node from tree and push next nodes to stack
-                var treeNode = _networkTree.ElementAt(BinaryUtils.EnsureEndianness(node.index));
+                var treeNode = _networkTree.ElementAt((int)BinaryUtils.EnsureEndianness(node.index));
 
                 if (treeNode.one > 0)
                 {

@@ -7,9 +7,9 @@ using libloc.Abstractions;
 namespace libloc.V1
 {
     [DebuggerDisplay("AS{Number} - {Name}")]
-    internal record DatabaseAS(uint Number, string Name) : IDatabaseAS, ISearchableItem<uint>
+    internal record DatabaseAS(int Number, string Name) : IDatabaseAS, ISearchableItem<int>
     {
-        uint ISearchableItem<uint>.Key => Number;
+        int ISearchableItem<int>.Key => Number;
 
         public override string ToString() => $"AS{Number}";
     }

@@ -5,8 +5,8 @@ using System.Collections.Generic;
 
 namespace libloc.Abstractions
 {
-    public interface IASDatabase : IEnumerable<IDatabaseAS>
+    public interface IASDatabase : IReadOnlyList<IDatabaseAS>
     {
-        IDatabaseAS this[uint index] { get; }
+        IDatabaseAS GetAS(int asn);
     }
 }

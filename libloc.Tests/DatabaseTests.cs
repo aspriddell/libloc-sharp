@@ -61,12 +61,12 @@ namespace libloc.Tests
             Assert.IsNull(addressInfo);
         }
 
-        [TestCase(786U)]
-        [TestCase(3333U)]
-        public async Task TestASLookup(uint asn)
+        [TestCase(786)]
+        [TestCase(3333)]
+        public async Task TestASLookup(int asn)
         {
             var database = TestServices.Services.GetRequiredService<ILocationDbAccessor>();
-            var asInfo = await database.PerformAsync(db => db.AS[asn]);
+            var asInfo = await database.PerformAsync(db => db.AS.GetAS(asn));
 
             Assert.IsNotNull(asInfo);
             Assert.IsNotEmpty(asInfo.Name);

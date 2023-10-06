@@ -20,11 +20,11 @@ namespace libloc.V1.Collections
             _pool = pool;
         }
 
-        public DatabaseCountry this[uint index] => FromSource(ElementAt(index));
+        public IDatabaseCountry this[int index] => FromSource(ElementAt(index));
 
         public IDatabaseCountry GetCountry(string code)
         {
-            return BinaryUtils.BinarySearch(Count, x => this[x], code);
+            return BinaryUtils.BinarySearch(Count, x => FromSource(ElementAt(x)), code);
         }
 
         private DatabaseCountry FromSource(DatabaseSourceCountry source)
@@ -39,7 +39,5 @@ namespace libloc.V1.Collections
         {
             return ((IEnumerable<DatabaseSourceCountry>)this).Select(FromSource).GetEnumerator();
         }
-
-        IDatabaseCountry ICountryDatabase.this[uint index] => this[index];
     }
 }
