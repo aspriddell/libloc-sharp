@@ -74,7 +74,7 @@ namespace libloc.V1
         public IAddressLocatedNetwork ResolveAddress(IPAddress address)
         {
             var depth = -1;
-            uint nextNodeIndex = 0;
+            int nextNodeIndex = 0;
 
             var mappedAddress = address.MapToIPv6().GetAddressBytes();
             Span<byte> networkAddress = stackalloc byte[mappedAddress.Length];
@@ -94,7 +94,7 @@ namespace libloc.V1
                 AddressUtils.SetAddressBit(networkAddress, depth, bit);
 
                 node = _networkTree.ElementAt(nextNodeIndex);
-                nextNodeIndex = BinaryUtils.EnsureEndianness(bit == 0 ? node.zero : node.one);
+                nextNodeIndex = (int)BinaryUtils.EnsureEndianness(bit == 0 ? node.zero : node.one);
             } while (nextNodeIndex > 0);
 
             if (!node.IsLeaf)

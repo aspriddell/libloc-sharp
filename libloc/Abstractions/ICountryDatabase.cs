@@ -5,10 +5,8 @@ using System.Collections.Generic;
 
 namespace libloc.Abstractions
 {
-    public interface ICountryDatabase : IEnumerable<IDatabaseCountry>
+    public interface ICountryDatabase : IReadOnlyList<IDatabaseCountry>
     {
-        IDatabaseCountry this[uint index] { get; }
-
         IDatabaseCountry GetCountry(string code);
     }
 }

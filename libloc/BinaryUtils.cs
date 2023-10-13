@@ -20,7 +20,7 @@ namespace libloc
         /// <remarks>
         /// Based on the .NET binary search function (https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Array.cs,b92d187c91d4c9a9)
         /// </remarks>
-        public static T BinarySearch<T, TKey>(int count, Func<uint, T> accessor, TKey target) where T : class, ISearchableItem<TKey>
+        public static T BinarySearch<T, TKey>(int count, Func<int, T> accessor, TKey target) where T : class, ISearchableItem<TKey>
         {
             var lo = 0;
             var hi = count - 1;
@@ -36,7 +36,7 @@ namespace libloc
 
                 try
                 {
-                    item = accessor.Invoke((uint)i);
+                    item = accessor.Invoke(i);
                     c = comparer.Compare(item.Key, target);
                 }
                 catch (Exception e)

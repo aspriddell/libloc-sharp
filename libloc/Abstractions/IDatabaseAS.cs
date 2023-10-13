@@ -5,7 +5,7 @@ namespace libloc.Abstractions
 {
     public interface IDatabaseAS
     {
-        uint Number { get; }
+        int Number { get; }
 
         string Name { get; }
     }

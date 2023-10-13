@@ -2,6 +2,7 @@
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO.MemoryMappedFiles;
 using System.Net;
@@ -18,13 +19,13 @@ namespace libloc.V1.Collections
         {
         }
 
-        public IDatabaseNetwork this[uint index] => FromSource(ElementAt(index), null);
+        public IDatabaseNetwork this[int index] => FromSource(ElementAt(index), null);
 
         internal DatabaseNetwork CreateWithPrefix(uint index, Span<byte> v6AddressBytes, int prefix)
         {
             Debug.Assert(v6AddressBytes.Length == 16);
 
-            var networkInfo = ElementAt(index);
+            var networkInfo = ElementAt((int)index);
 
             Span<byte> bitmask = stackalloc byte[v6AddressBytes.Length];
             Span<byte> firstAddressBytes = stackalloc byte[v6AddressBytes.Length];
@@ -50,6 +51,14 @@ namespace libloc.V1.Collections
             var countryCode = Encoding.ASCII.GetString(source.country_code, 2);
 
             return new DatabaseNetwork(network, countryCode, correctedAsn, (NetworkFlags)correctedFlags);
+        }
+
+        public IEnumerator<IDatabaseNetwork> GetEnumerator()
+        {
+            for (var i = 0; i < Count; i++)
+            {
+                yield return this[i];
+            }
         }
     }
 }
