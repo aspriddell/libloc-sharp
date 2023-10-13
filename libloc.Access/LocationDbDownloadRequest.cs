@@ -15,7 +15,7 @@ namespace libloc.Access
         /// <summary>
         /// The <see cref="DateTime"/> the previous database was downloaded, if applicable
         /// </summary>
-        public DateTime? LastDownload { get; set; }
+        public DateTimeOffset? LastDownload { get; set; }
 
         void IRequestExecutingCallback.OnRequestExecuting(ApiClient client)
         {

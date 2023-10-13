@@ -16,7 +16,7 @@ namespace libloc.Abstractions
         string License { get; }
         string Description { get; }
 
-        DateTime CreatedAt { get; }
+        DateTimeOffset CreatedAt { get; }
 
         IASDatabase AS { get; }
         INetworkDatabase Networks { get; }

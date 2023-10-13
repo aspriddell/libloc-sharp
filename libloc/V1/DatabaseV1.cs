@@ -23,7 +23,6 @@ namespace libloc.V1
         private readonly DatabaseV1Networks _networks;
         private readonly DatabaseV1AS _as;
 
-        private readonly ulong _createdTimestamp;
         private readonly uint _vendorStringLoc, _descriptionStringLoc, _licenseStringLoc;
 
         internal unsafe DatabaseV1(MemoryMappedFile mmdb)
@@ -41,7 +40,7 @@ namespace libloc.V1
             _licenseStringLoc = header.license;
             _descriptionStringLoc = header.description;
 
-            _createdTimestamp = BinaryUtils.EnsureEndianness(header.created_at);
+            CreatedAt = DateTimeOffset.FromUnixTimeSeconds((long)BinaryUtils.EnsureEndianness(header.created_at));
 
             // create object views
             var networkTreeView = mmdb.CreateViewAccessor(BinaryUtils.EnsureEndianness(header.network_tree_offset), BinaryUtils.EnsureEndianness(header.network_tree_length), MemoryMappedFileAccess.Read);
@@ -63,12 +62,10 @@ namespace libloc.V1
         public int Version => 1;
 
         public string Vendor => _stringPool[_vendorStringLoc];
-
         public string License => _stringPool[_licenseStringLoc];
-
         public string Description => _stringPool[_descriptionStringLoc];
 
-        public DateTime CreatedAt => DateTime.UnixEpoch.AddSeconds(_createdTimestamp);
+        public DateTimeOffset CreatedAt { get; }
 
         public IASDatabase AS => _as;
         public INetworkDatabase Networks => _networks;
