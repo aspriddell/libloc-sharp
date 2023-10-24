@@ -41,7 +41,7 @@ namespace libloc.Access
 
         private const string DatabaseName = "location-{0}.db";
 
-        private string DatabaseStorageRoot => _configuration["LocationDb:StorageRoot"] ?? ".";
+        private string DatabaseStorageRoot => _configuration["LocationDb:StorageRoot"] ?? Path.GetFullPath(".");
 
         public async Task PerformAsync(Func<ILocationDatabase, Task> action)
         {
@@ -74,14 +74,14 @@ namespace libloc.Access
                 LastDownload = _database?.CreatedAt
             };
 
+            _logger.LogDebug("Performing location.db download request using {x} expiry date", downloadRequest.LastDownload?.ToString("r") ?? "no");
             using var response = await _client.PerformAsync(downloadRequest).ConfigureAwait(false);
 
             switch (response.StatusCode)
             {
                 case HttpStatusCode.OK:
                 {
-                    var version = (ulong)(response.Content.Headers.LastModified ?? DateTime.UtcNow).Subtract(DateTime.UnixEpoch).TotalSeconds;
-
+                    var version = (response.Content.Headers.LastModified ?? DateTimeOffset.UtcNow).ToUnixTimeSeconds();
                     _logger.LogInformation("New location.db discovered, writing version {ver} to disk", version);
 
                     try
@@ -145,14 +145,17 @@ namespace libloc.Access
             {
                 foreach (var dbFile in dbFiles.OrderByDescending(File.GetLastWriteTimeUtc))
                 {
+                    var fileName = Path.GetFileName(dbFile);
+
                     try
                     {
+                        _logger.LogInformation("Loading db {file}", fileName);
                         var newDatabase = DatabaseLoader.LoadFromFile(dbFile);
-
-                        _logger.LogInformation("Loaded location db {file}", Path.GetFileName(dbFile));
 
                         _database?.Dispose();
                         _database = newDatabase;
+
+                        _logger.LogInformation("Successfully loaded db {file}", fileName);
 
                         // remove all other location.db files
                         foreach (var file in dbFiles.Where(x => x != dbFile))
@@ -165,7 +168,7 @@ namespace libloc.Access
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogWarning("{db} failed to load - {message}", Path.GetFileName(dbFile), ex.Message);
+                        _logger.LogWarning("{db} failed to load - {message}", fileName, ex.Message);
                     }
                 }
             }
