@@ -135,7 +135,7 @@ namespace libloc.Access
                 }
 
                 case HttpStatusCode.NotModified:
-                    _logger.LogInformation("location.db not modified since {date}, check completed successfully", response.Content.Headers.LastModified?.ToString("f"));
+                    _logger.LogInformation("location.db not modified since {date}, check completed successfully", response.Content.Headers.LastModified);
                     return false;
 
                 default:
@@ -168,7 +168,7 @@ namespace libloc.Access
                         var nameMatch = DatabaseVersionMatcher.Match(fileName);
                         _databaseCreationTime = nameMatch.Success ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(nameMatch.Groups[1].Value)) : null;
 
-                        _logger.LogInformation("Successfully loaded db {file}", fileName);
+                        _logger.LogInformation("Successfully loaded db {file} with expiry {exp}", fileName, _databaseCreationTime);
 
                         // remove all other location.db files
                         foreach (var file in dbFiles.Where(x => x != dbFile))
