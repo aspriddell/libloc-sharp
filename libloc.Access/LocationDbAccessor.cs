@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DragonFruit.Data;
@@ -26,8 +27,12 @@ namespace libloc.Access
         private readonly IDisposable _initialLock;
         private readonly ApiClient _client;
 
-        private ILocationDatabase _database;
         private Timer _fetchTimer;
+        private ILocationDatabase _database;
+        private DateTimeOffset? _databaseCreationTime;
+
+        private const string DatabaseName = "location-{0}.db";
+        private static readonly Regex DatabaseVersionMatcher = new(@"location-(\d+)\.db", RegexOptions.Compiled);
 
         public LocationDbAccessor(ILogger<LocationDbAccessor> logger, IConfiguration configuration, ApiClient client)
         {
@@ -38,8 +43,6 @@ namespace libloc.Access
 
             _initialLock = _lock.WriterLock();
         }
-
-        private const string DatabaseName = "location-{0}.db";
 
         private string DatabaseStorageRoot => _configuration["LocationDb:StorageRoot"] ?? Path.GetFullPath(".");
 
@@ -71,7 +74,7 @@ namespace libloc.Access
         {
             var downloadRequest = new LocationDbDownloadRequest
             {
-                LastDownload = _database?.CreatedAt
+                LastDownload = _databaseCreationTime ?? _database?.CreatedAt
             };
 
             _logger.LogDebug("Performing location.db download request using {x} expiry date", downloadRequest.LastDownload?.ToString("r") ?? "no");
@@ -82,15 +85,22 @@ namespace libloc.Access
                 case HttpStatusCode.OK:
                 {
                     var version = (response.Content.Headers.LastModified ?? DateTimeOffset.UtcNow).ToUnixTimeSeconds();
+                    var databaseFileLocation = Path.Combine(DatabaseStorageRoot, string.Format(DatabaseName, version));
+
+                    if (File.Exists(databaseFileLocation))
+                    {
+                        _logger.LogInformation("File {name} already exists, skipping...", Path.GetFileName(databaseFileLocation));
+                        return false;
+                    }
+
                     _logger.LogInformation("New location.db discovered, writing version {ver} to disk", version);
 
                     try
                     {
+                        // download to temp file, expand and copy to new file before switching old database out.
                         await using var tempStream = new FileStream(Path.GetTempFileName(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 4096, FileOptions.Asynchronous | FileOptions.SequentialScan | FileOptions.DeleteOnClose);
 
                         var stopwatch = new Stopwatch();
-
-                        // buffer network stream to temp file stream
                         await using (var content = await response.Content.ReadAsStreamAsync().ConfigureAwait(false))
                         {
                             stopwatch.Start();
@@ -101,7 +111,6 @@ namespace libloc.Access
                         tempStream.Seek(0, SeekOrigin.Begin);
 
                         _logger.LogInformation("location.db written to temp file successfully (in {x:0.00} seconds)", stopwatch.Elapsed.TotalSeconds);
-                        var databaseFileLocation = Path.Combine(DatabaseStorageRoot, string.Format(DatabaseName, version));
 
                         // create an XZStream over the temp stream and write to the destination
                         await using (var xzStream = new XZStream(tempStream))
@@ -154,6 +163,10 @@ namespace libloc.Access
 
                         _database?.Dispose();
                         _database = newDatabase;
+
+                        // use regex to get more accurate version info
+                        var nameMatch = DatabaseVersionMatcher.Match(fileName);
+                        _databaseCreationTime = nameMatch.Success ? DateTimeOffset.FromUnixTimeSeconds(long.Parse(nameMatch.Groups[1].Value)) : null;
 
                         _logger.LogInformation("Successfully loaded db {file}", fileName);
 
