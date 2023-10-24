@@ -2,6 +2,7 @@
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
+using System.Globalization;
 using DragonFruit.Data;
 using DragonFruit.Data.Extensions;
 using DragonFruit.Data.Requests;
@@ -15,13 +16,13 @@ namespace libloc.Access
         /// <summary>
         /// The <see cref="DateTime"/> the previous database was downloaded, if applicable
         /// </summary>
-        public DateTimeOffset? LastDownload { get; set; }
+        public DateTimeOffset? LastDownload { get; init; }
 
         void IRequestExecutingCallback.OnRequestExecuting(ApiClient client)
         {
             if (LastDownload.HasValue)
             {
-                this.WithHeader("If-Modified-Since", LastDownload.Value.ToString("R"));
+                this.WithHeader("If-Modified-Since", LastDownload.Value.ToString("r", CultureInfo.InvariantCulture));
             }
         }
     }
