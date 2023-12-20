@@ -2,7 +2,7 @@
 [![DragonFruit Discord](https://img.shields.io/discord/482528405292843018?label=Discord)](https://discord.gg/VA26u5Z)
 ![GitHub Latest Release)](https://img.shields.io/github/v/release/aspriddell/libloc-sharp?logo=github)
 
-A version of IPFire's libloc library rewritten for C#
+A version of IPFire's libloc library rewritten for .NET
 
 ## Overview
 This is a rewritten version of libloc (an IP address database used by IPFire firewall software to screen network traffic)
