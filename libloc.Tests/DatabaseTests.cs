@@ -42,7 +42,7 @@ namespace libloc.Tests
             var database = TestServices.Services.GetRequiredService<ILocationDbAccessor>();
             var addressInfo = await database.PerformAsync(db => db.ResolveAddress(IPAddress.Parse(address))).ConfigureAwait(false);
 
-            Assert.IsNotNull(addressInfo);
+            Assert.That(addressInfo, Is.Not.Null);
             Assert.That(addressInfo.ASN, Is.EqualTo(expectedAs));
             Assert.That(addressInfo.Network.FirstUsable, Is.EqualTo(IPAddress.Parse(expectedStartBlock).MapToIPv6()));
         }
@@ -61,7 +61,7 @@ namespace libloc.Tests
             var database = TestServices.Services.GetRequiredService<ILocationDbAccessor>();
             var addressInfo = await database.PerformAsync(db => db.ResolveAddress(ipAddress));
 
-            Assert.IsNull(addressInfo);
+            Assert.That(addressInfo, Is.Not.Null);
         }
 
         [TestCase(786)]
@@ -71,8 +71,8 @@ namespace libloc.Tests
             var database = TestServices.Services.GetRequiredService<ILocationDbAccessor>();
             var asInfo = await database.PerformAsync(db => db.AS.GetAS(asn));
 
-            Assert.IsNotNull(asInfo);
-            Assert.IsNotEmpty(asInfo.Name);
+            Assert.That(asInfo, Is.Not.Null);
+            Assert.That(asInfo.Name, Is.Not.Empty);
         }
     }
 }

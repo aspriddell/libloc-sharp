@@ -2,10 +2,8 @@
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
-using System.Net;
-using System.Net.Http;
 using DragonFruit.Data;
-using DragonFruit.Data.Serializers.SystemJson;
+using DragonFruit.Data.Serializers;
 using libloc.Access;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -20,13 +18,9 @@ namespace libloc.Tests
         {
             var builder = Host.CreateApplicationBuilder();
 
-            builder.Services.AddSingleton<ApiClient>(new ApiClient<ApiSystemTextJsonSerializer>
+            builder.Services.AddSingleton<ApiClient>(new ApiClient<ApiJsonSerializer>
             {
-                UserAgent = "libloc-sharp-test",
-                Handler = () => new SocketsHttpHandler
-                {
-                    AutomaticDecompression = DecompressionMethods.None
-                }
+                UserAgent = "libloc-sharp-test"
             });
 
             builder.Services.AddLocationDb();
