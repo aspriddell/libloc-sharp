@@ -6,6 +6,7 @@
         <Authors>Albie Spriddell</Authors>
 
         <PackageIcon>icon.jpg</PackageIcon>
+        <PackageReadmeFile>docs/readme.md</PackageReadmeFile>
         <PackageTags>geoip, libloc, ipfire, ip, ip2location</PackageTags>
         <PackageLicenseExpression>LGPL-2.1-only</PackageLicenseExpression>
 
@@ -18,7 +19,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Include="..\icon.jpg" Pack="true" PackagePath="."/>
+        <None Include="..\icon.jpg" Pack="true" PackagePath="." Visible="false"/>
+        <None Include="..\readme.jpg" Pack="true" PackagePath="docs" Visible="false"/>
     </ItemGroup>
 
 </Project>
