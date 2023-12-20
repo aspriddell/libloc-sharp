@@ -22,7 +22,9 @@ namespace libloc.Access
     internal class LocationDbAccessor : ILocationDbAccessor, IHostedService, IDisposable
     {
         private const string DatabaseName = "location-{0}.db";
+
         private static readonly Regex DatabaseVersionMatcher = new(@"location-(\d+)\.db", RegexOptions.Compiled);
+
         private readonly ApiClient _client;
         private readonly IConfiguration _configuration;
         private readonly IDisposable _initialLock;
