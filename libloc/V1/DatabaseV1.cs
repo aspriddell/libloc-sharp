@@ -1,4 +1,4 @@
-﻿// liblocsharp - A version of IPFire's libloc library rewritten for C#
+﻿// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
@@ -15,13 +15,13 @@ namespace libloc.V1
 {
     public class DatabaseV1 : ILocationDatabase
     {
+        private readonly DatabaseV1AS _as;
+        private readonly DatabaseV1Countries _countries;
         private readonly MemoryMappedFile _mmdb;
+        private readonly DatabaseV1Networks _networks;
 
         private readonly DatabaseV1NetworkTree _networkTree;
         private readonly DatabaseV1StringPool _stringPool;
-        private readonly DatabaseV1Countries _countries;
-        private readonly DatabaseV1Networks _networks;
-        private readonly DatabaseV1AS _as;
 
         private readonly uint _vendorStringLoc, _descriptionStringLoc, _licenseStringLoc;
 

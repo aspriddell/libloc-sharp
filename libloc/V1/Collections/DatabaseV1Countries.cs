@@ -1,4 +1,4 @@
-﻿// liblocsharp - A version of IPFire's libloc library rewritten for C#
+﻿// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System.Collections.Generic;
@@ -27,17 +27,17 @@ namespace libloc.V1.Collections
             return BinaryUtils.BinarySearch(Count, x => FromSource(ElementAt(x)), code);
         }
 
+        public IEnumerator<IDatabaseCountry> GetEnumerator()
+        {
+            return ((IEnumerable<DatabaseSourceCountry>)this).Select(FromSource).GetEnumerator();
+        }
+
         private DatabaseCountry FromSource(DatabaseSourceCountry source)
         {
             var code = Encoding.ASCII.GetString(source.code, 2);
             var continent = Encoding.ASCII.GetString(source.continent_code, 2);
 
             return new DatabaseCountry(code, continent, _pool[source.name_poolid]);
-        }
-
-        public IEnumerator<IDatabaseCountry> GetEnumerator()
-        {
-            return ((IEnumerable<DatabaseSourceCountry>)this).Select(FromSource).GetEnumerator();
         }
     }
 }

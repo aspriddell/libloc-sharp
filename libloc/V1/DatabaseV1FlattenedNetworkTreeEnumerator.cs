@@ -1,4 +1,4 @@
-﻿// liblocsharp - A version of IPFire's libloc library rewritten for C#
+﻿// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System.Collections;
@@ -11,8 +11,8 @@ namespace libloc.V1
 {
     internal class DatabaseV1FlattenedNetworkTreeEnumerator : IEnumerator<IAddressLocatedNetwork>
     {
-        private readonly IEnumerator<IAddressLocatedNetwork> _treeEnumerator;
         private readonly Stack<IAddressLocatedNetwork> _pendingNetworkStack = new();
+        private readonly IEnumerator<IAddressLocatedNetwork> _treeEnumerator;
 
         public DatabaseV1FlattenedNetworkTreeEnumerator(IEnumerator<IAddressLocatedNetwork> treeEnumerator)
         {

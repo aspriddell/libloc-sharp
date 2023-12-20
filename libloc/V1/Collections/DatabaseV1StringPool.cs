@@ -1,4 +1,4 @@
-﻿// liblocsharp - A version of IPFire's libloc library rewritten for C#
+﻿// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
@@ -15,6 +15,11 @@ namespace libloc.V1.Collections
         internal DatabaseV1StringPool(MemoryMappedViewAccessor sourcePool)
         {
             _sourcePool = sourcePool;
+        }
+
+        public void Dispose()
+        {
+            _sourcePool.Dispose();
         }
 
         public string this[uint offset] => GetInternal(offset);
@@ -34,11 +39,6 @@ namespace libloc.V1.Collections
             {
                 _sourcePool.SafeMemoryMappedViewHandle.ReleasePointer();
             }
-        }
-
-        public void Dispose()
-        {
-            _sourcePool.Dispose();
         }
     }
 }

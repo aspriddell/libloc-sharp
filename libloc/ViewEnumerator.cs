@@ -1,4 +1,4 @@
-﻿// liblocsharp - A version of IPFire's libloc library rewritten for C#
+﻿// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System.Collections;
@@ -11,12 +11,12 @@ namespace libloc
     internal class ViewEnumerator<T> : IEnumerator<T> where T : struct
     {
         private readonly MemoryMappedViewAccessor _accessor;
-        private readonly int _originalOffset;
-        private readonly int _maxOffset;
         private readonly int _chunkSize;
+        private readonly int _maxOffset;
+        private readonly int _originalOffset;
+        private T _current;
 
         private int _offset;
-        private T _current;
 
         internal ViewEnumerator(MemoryMappedViewAccessor accessor, int skip = 0, int? count = null)
         {

@@ -1,4 +1,4 @@
-// liblocsharp - A version of IPFire's libloc library rewritten for C#
+// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
@@ -20,6 +20,14 @@ namespace libloc.V1.Collections
         }
 
         public IDatabaseNetwork this[int index] => FromSource(ElementAt(index), null);
+
+        public IEnumerator<IDatabaseNetwork> GetEnumerator()
+        {
+            for (var i = 0; i < Count; i++)
+            {
+                yield return this[i];
+            }
+        }
 
         internal DatabaseNetwork CreateWithPrefix(uint index, Span<byte> v6AddressBytes, int prefix)
         {
@@ -51,14 +59,6 @@ namespace libloc.V1.Collections
             var countryCode = Encoding.ASCII.GetString(source.country_code, 2);
 
             return new DatabaseNetwork(network, countryCode, correctedAsn, (NetworkFlags)correctedFlags);
-        }
-
-        public IEnumerator<IDatabaseNetwork> GetEnumerator()
-        {
-            for (var i = 0; i < Count; i++)
-            {
-                yield return this[i];
-            }
         }
     }
 }

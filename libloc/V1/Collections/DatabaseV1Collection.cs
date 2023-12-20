@@ -1,4 +1,4 @@
-// liblocsharp - A version of IPFire's libloc library rewritten for C#
+// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
@@ -11,8 +11,8 @@ namespace libloc.V1.Collections
 {
     internal abstract class DatabaseV1Collection<T> : IEnumerable<T>, IDisposable where T : struct
     {
-        private readonly MemoryMappedViewAccessor _view;
         private readonly int _entitySize;
+        private readonly MemoryMappedViewAccessor _view;
 
         protected DatabaseV1Collection(MemoryMappedViewAccessor view)
         {
@@ -24,10 +24,9 @@ namespace libloc.V1.Collections
 
         public int Count { get; }
 
-        internal protected T ElementAt(int index)
+        public virtual void Dispose()
         {
-            _view.Read(index * _entitySize, out T data);
-            return data;
+            _view.Dispose();
         }
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
@@ -40,9 +39,10 @@ namespace libloc.V1.Collections
             return ((IEnumerable<T>)this).GetEnumerator();
         }
 
-        public virtual void Dispose()
+        internal protected T ElementAt(int index)
         {
-            _view.Dispose();
+            _view.Read(index * _entitySize, out T data);
+            return data;
         }
     }
 }

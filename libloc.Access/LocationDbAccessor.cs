@@ -1,4 +1,4 @@
-// liblocsharp - A version of IPFire's libloc library rewritten for C#
+// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
@@ -21,18 +21,17 @@ namespace libloc.Access
 {
     internal class LocationDbAccessor : ILocationDbAccessor, IHostedService, IDisposable
     {
-        private readonly ILogger<LocationDbAccessor> _logger;
-        private readonly IConfiguration _configuration;
-        private readonly AsyncReaderWriterLock _lock;
-        private readonly IDisposable _initialLock;
+        private const string DatabaseName = "location-{0}.db";
+        private static readonly Regex DatabaseVersionMatcher = new(@"location-(\d+)\.db", RegexOptions.Compiled);
         private readonly ApiClient _client;
-
-        private Timer _fetchTimer;
+        private readonly IConfiguration _configuration;
+        private readonly IDisposable _initialLock;
+        private readonly AsyncReaderWriterLock _lock;
+        private readonly ILogger<LocationDbAccessor> _logger;
         private ILocationDatabase _database;
         private DateTimeOffset? _databaseCreationTime;
 
-        private const string DatabaseName = "location-{0}.db";
-        private static readonly Regex DatabaseVersionMatcher = new(@"location-(\d+)\.db", RegexOptions.Compiled);
+        private Timer _fetchTimer;
 
         public LocationDbAccessor(ILogger<LocationDbAccessor> logger, IConfiguration configuration, ApiClient client)
         {
@@ -45,6 +44,42 @@ namespace libloc.Access
         }
 
         private string DatabaseStorageRoot => _configuration["LocationDb:StorageRoot"] ?? Path.GetFullPath(".");
+
+        public void Dispose()
+        {
+            _database?.Dispose();
+            _initialLock?.Dispose();
+        }
+
+        async Task IHostedService.StartAsync(CancellationToken cancellationToken)
+        {
+            using (_initialLock)
+            {
+                // load from disk
+                var dbLoaded = await LoadLatestDatabase(false).ConfigureAwait(false);
+                var initialTimeout = dbLoaded ? TimeSpan.Zero : TimeSpan.FromHours(24);
+
+                while (!dbLoaded)
+                {
+                    // download new database from network
+                    if (!await DownloadLatestDatabase().ConfigureAwait(false))
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        dbLoaded = await LoadLatestDatabase(false).ConfigureAwait(false);
+                    }
+                }
+
+                _fetchTimer = new Timer(s => _ = PerformUpdate(), null, initialTimeout, TimeSpan.FromHours(24));
+            }
+        }
+
+        async Task IHostedService.StopAsync(CancellationToken cancellationToken)
+        {
+            await _fetchTimer.DisposeAsync();
+        }
 
         public async Task PerformAsync(Func<ILocationDatabase, Task> action)
         {
@@ -197,42 +232,6 @@ namespace libloc.Access
             {
                 await LoadLatestDatabase().ConfigureAwait(false);
             }
-        }
-
-        async Task IHostedService.StartAsync(CancellationToken cancellationToken)
-        {
-            using (_initialLock)
-            {
-                // load from disk
-                var dbLoaded = await LoadLatestDatabase(false).ConfigureAwait(false);
-                var initialTimeout = dbLoaded ? TimeSpan.Zero : TimeSpan.FromHours(24);
-
-                while (!dbLoaded)
-                {
-                    // download new database from network
-                    if (!await DownloadLatestDatabase().ConfigureAwait(false))
-                    {
-                        await Task.Delay(TimeSpan.FromSeconds(15), cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        dbLoaded = await LoadLatestDatabase(false).ConfigureAwait(false);
-                    }
-                }
-
-                _fetchTimer = new Timer(s => _ = PerformUpdate(), null, initialTimeout, TimeSpan.FromHours(24));
-            }
-        }
-
-        async Task IHostedService.StopAsync(CancellationToken cancellationToken)
-        {
-            await _fetchTimer.DisposeAsync();
-        }
-
-        public void Dispose()
-        {
-            _database?.Dispose();
-            _initialLock?.Dispose();
         }
     }
 }

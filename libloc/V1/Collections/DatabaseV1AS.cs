@@ -1,4 +1,4 @@
-// liblocsharp - A version of IPFire's libloc library rewritten for C#
+// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
@@ -35,15 +35,15 @@ namespace libloc.V1.Collections
 
         public IDatabaseAS GetAS(int asn) => BinaryUtils.BinarySearch(Count, x => FromSource(ElementAt(x)), asn);
 
+        public IEnumerator<IDatabaseAS> GetEnumerator()
+        {
+            return ((IEnumerable<DatabaseSourceAS>)this).Select(FromSource).GetEnumerator();
+        }
+
         private DatabaseAS FromSource(DatabaseSourceAS source)
         {
             var asn = BinaryUtils.EnsureEndianness(source.number);
             return new DatabaseAS((int)asn, _pool[source.name_poolid]);
-        }
-
-        public IEnumerator<IDatabaseAS> GetEnumerator()
-        {
-            return ((IEnumerable<DatabaseSourceAS>)this).Select(FromSource).GetEnumerator();
         }
     }
 }
