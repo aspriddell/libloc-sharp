@@ -220,7 +220,7 @@ namespace libloc.Access
                     }
                 }
 
-                _fetchTimer = new Timer(_ => PerformUpdate(), null, initialTimeout, TimeSpan.FromHours(24));
+                _fetchTimer = new Timer(s => _ = PerformUpdate(), null, initialTimeout, TimeSpan.FromHours(24));
             }
         }
 
