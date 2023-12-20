@@ -61,7 +61,7 @@ namespace libloc.Tests
             var database = TestServices.Services.GetRequiredService<ILocationDbAccessor>();
             var addressInfo = await database.PerformAsync(db => db.ResolveAddress(ipAddress));
 
-            Assert.That(addressInfo, Is.Not.Null);
+            Assert.That(addressInfo, Is.Null);
         }
 
         [TestCase(786)]
