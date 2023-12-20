@@ -4,26 +4,20 @@
 using System;
 using System.Globalization;
 using DragonFruit.Data;
-using DragonFruit.Data.Extensions;
 using DragonFruit.Data.Requests;
 
 namespace libloc.Access
 {
-    public class LocationDbDownloadRequest : ApiRequest, IRequestExecutingCallback
+    public partial class LocationDbDownloadRequest : ApiRequest
     {
-        public override string Path => "https://location.ipfire.org/databases/1/location.db.xz";
+        public override string RequestPath => "https://location.ipfire.org/databases/1/location.db.xz";
 
         /// <summary>
         /// The <see cref="DateTime"/> the previous database was downloaded, if applicable
         /// </summary>
         public DateTimeOffset? LastDownload { get; init; }
 
-        void IRequestExecutingCallback.OnRequestExecuting(ApiClient client)
-        {
-            if (LastDownload.HasValue)
-            {
-                this.WithHeader("If-Modified-Since", LastDownload.Value.ToString("r", CultureInfo.InvariantCulture));
-            }
-        }
+        [RequestParameter(ParameterType.Header, "If-Modified-Since")]
+        protected string ModificationDate => LastDownload?.ToString("r", CultureInfo.InvariantCulture);
     }
 }
