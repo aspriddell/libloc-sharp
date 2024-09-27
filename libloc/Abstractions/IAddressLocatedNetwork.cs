@@ -7,6 +7,6 @@ namespace libloc.Abstractions
 {
     public interface IAddressLocatedNetwork : IDatabaseNetwork
     {
-        IPNetwork Network { get; }
+        IPNetwork2 Network { get; }
     }
 }

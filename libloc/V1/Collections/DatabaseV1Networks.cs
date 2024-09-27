@@ -49,10 +49,10 @@ namespace libloc.V1.Collections
                 firstAddressBytes[i] = (byte)(v6AddressBytes[i] & bitmask[i]);
             }
 
-            return FromSource(networkInfo, IPNetwork.Parse(new IPAddress(firstAddressBytes), new IPAddress(bitmask)));
+            return FromSource(networkInfo, IPNetwork2.Parse(new IPAddress(firstAddressBytes), new IPAddress(bitmask)));
         }
 
-        private unsafe DatabaseNetwork FromSource(DatabaseSourceNetwork source, IPNetwork network)
+        private unsafe DatabaseNetwork FromSource(DatabaseSourceNetwork source, IPNetwork2 network)
         {
             var correctedAsn = BinaryUtils.EnsureEndianness(source.asn);
             var correctedFlags = BinaryUtils.EnsureEndianness(source.flags);

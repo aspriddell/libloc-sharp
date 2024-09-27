@@ -6,5 +6,5 @@ using libloc.Abstractions;
 
 namespace libloc.V1
 {
-    public record DatabaseNetwork(IPNetwork Network, string CountryCode, uint ASN, NetworkFlags Flags) : IAddressLocatedNetwork;
+    public record DatabaseNetwork(IPNetwork2 Network, string CountryCode, uint ASN, NetworkFlags Flags) : IAddressLocatedNetwork;
 }

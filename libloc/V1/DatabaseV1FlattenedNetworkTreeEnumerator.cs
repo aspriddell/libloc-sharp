@@ -56,7 +56,7 @@ namespace libloc.V1
             }
 
             // combine all networks and get the gaps created as well...
-            var nets = IPNetwork.Supernet(treeSubnets.ToArray());
+            var nets = IPNetwork2.Supernet(treeSubnets.ToArray());
             foreach (var network in nets)
             {
                 _pendingNetworkStack.Push(new DatabaseNetwork(network, nextNetwork.CountryCode, nextNetwork.ASN, nextNetwork.Flags));
