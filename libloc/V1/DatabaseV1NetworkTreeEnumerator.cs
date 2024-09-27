@@ -38,25 +38,24 @@ namespace libloc.V1
             {
                 var node = _networkStack.Pop();
 
-                if (_visitedNetworks.Contains(node.index))
+                if (!_visitedNetworks.Add(node.Index))
                 {
                     continue;
                 }
 
-                _visitedNetworks.Add(node.index);
-                AddressUtils.SetAddressBit(_networkAddress, node.depth > 0 ? node.depth - 1 : 0, node.nodeOne ? 1 : 0);
+                AddressUtils.SetAddressBit(_networkAddress, node.Depth > 0 ? node.Depth - 1 : 0, node.NodeOne ? 1 : 0);
 
                 // get node from tree and push next nodes to stack
-                var treeNode = _networkTree.ElementAt((int)BinaryUtils.EnsureEndianness(node.index));
+                var treeNode = _networkTree.ElementAt((int)BinaryUtils.EnsureEndianness(node.Index));
 
                 if (treeNode.one > 0)
                 {
-                    _networkStack.Push(new NodeStackItem(treeNode.one, node.depth + 1, true));
+                    _networkStack.Push(new NodeStackItem(treeNode.one, node.Depth + 1, true));
                 }
 
                 if (treeNode.zero > 0)
                 {
-                    _networkStack.Push(new NodeStackItem(treeNode.zero, node.depth + 1, false));
+                    _networkStack.Push(new NodeStackItem(treeNode.zero, node.Depth + 1, false));
                 }
 
                 if (!treeNode.IsLeaf)
@@ -70,7 +69,7 @@ namespace libloc.V1
                     continue;
                 }
 
-                Current = _networks.CreateWithPrefix(BinaryUtils.EnsureEndianness(treeNode.network), _networkAddress, node.depth);
+                Current = _networks.CreateWithPrefix(BinaryUtils.EnsureEndianness(treeNode.network), _networkAddress, node.Depth);
 
                 return true;
             }
@@ -98,15 +97,15 @@ namespace libloc.V1
         {
             public NodeStackItem(uint index, int depth, bool nodeOne)
             {
-                this.index = index;
-                this.depth = depth;
-                this.nodeOne = nodeOne;
+                Index = index;
+                Depth = depth;
+                NodeOne = nodeOne;
             }
 
-            public readonly uint index;
+            public readonly uint Index;
 
-            public readonly int depth;
-            public readonly bool nodeOne;
+            public readonly int Depth;
+            public readonly bool NodeOne;
         }
     }
 }

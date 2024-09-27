@@ -21,9 +21,7 @@ namespace libloc.V1
 
         public bool MoveNext()
         {
-            IAddressLocatedNetwork nextNetwork;
-
-            if (!_pendingNetworkStack.TryPop(out nextNetwork))
+            if (!_pendingNetworkStack.TryPop(out var nextNetwork))
             {
                 // move next in base tree
                 if (!_treeEnumerator.MoveNext())
@@ -35,7 +33,7 @@ namespace libloc.V1
             }
 
             // walk the tree to create a list of subnets
-            var treeSubnets = new List<IPNetwork>();
+            var treeSubnets = new List<IPNetwork2>();
 
             while (_treeEnumerator.MoveNext())
             {
