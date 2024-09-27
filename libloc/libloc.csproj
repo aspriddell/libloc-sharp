@@ -2,8 +2,8 @@
 
     <PropertyGroup>
         <PackageId>libloc</PackageId>
-        <TargetFramework>net6.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
         <Description>A version of IPFire's libloc library rewritten for C#</Description>
     </PropertyGroup>
 
