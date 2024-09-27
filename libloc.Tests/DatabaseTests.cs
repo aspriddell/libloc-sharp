@@ -32,9 +32,9 @@ namespace libloc.Tests
             await locationDbService.StopAsync(timeout.Token);
         }
 
-        [TestCase("20.219.1.99", "20.192.0.0", 8075)]
-        [TestCase("140.238.99.135", "140.238.96.0", 31898)]
-        [TestCase("157.245.207.149", "157.245.192.0", 14061)]
+        [TestCase("20.219.1.99", "20.219.0.0", 8075)]
+        [TestCase("140.238.99.135", "140.238.0.0", 31898)]
+        [TestCase("157.245.207.149", "157.245.128.0", 14061)]
         [TestCase("2001:67c:2e8:22::c100:691", "2001:67c:2e8::", 3333)]
         [TestCase("2a00:23c7:acb:ef01::", "2a00:2380::", 2856)]
         public async Task TestAddressResolution(string address, string expectedStartBlock, int expectedAs)
