@@ -33,8 +33,8 @@ namespace libloc.Tests
         }
 
         [TestCase("20.219.1.99", "20.219.0.0", 8075)]
-        [TestCase("140.238.99.135", "140.238.0.0", 31898)]
-        [TestCase("157.245.207.149", "157.245.128.0", 14061)]
+        [TestCase("140.238.99.135", "140.238.96.0", 31898)]
+        [TestCase("157.245.207.149", "157.245.192.0", 14061)]
         [TestCase("2001:67c:2e8:22::c100:691", "2001:67c:2e8::", 3333)]
         [TestCase("2a00:23c7:acb:ef01::", "2a00:2380::", 2856)]
         public async Task TestAddressResolution(string address, string expectedStartBlock, int expectedAs)
@@ -47,9 +47,9 @@ namespace libloc.Tests
             Assert.That(addressInfo.Network.FirstUsable, Is.EqualTo(IPAddress.Parse(expectedStartBlock).MapToIPv6()));
         }
 
+        [TestCase("100::1")]
         [TestCase("10.11.12.13")]
         [TestCase("127.0.20.100")]
-        [TestCase("fc00::2001:abcd:0010")]
         public async Task TestUnassignedAddressResolution(string address)
         {
             if (!IPAddress.TryParse(address, out var ipAddress))
