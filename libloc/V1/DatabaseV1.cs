@@ -88,37 +88,42 @@ namespace libloc.V1
 
         public IAddressLocatedNetwork ResolveAddress(IPAddress address)
         {
-            var depth = -1;
-            int nextNodeIndex = 0;
+            uint nextNodeIndex = 0;
+            uint? networkIndex = null;
 
+            var depth = 0;
+            var prefix = 0;
             var mappedAddress = address.MapToIPv6().GetAddressBytes();
-            Span<byte> networkAddress = stackalloc byte[mappedAddress.Length];
 
-            DatabaseSourceNetworkNode node;
-
-            do
+            while (true)
             {
                 if (nextNodeIndex >= _networkTree.Count)
                 {
-                    return null;
+                    throw new FileFormatException("The network tree contains an invalid node index");
                 }
 
-                // get the bit to perform next node indexing on
-                var bit = AddressUtils.GetAddressBit(mappedAddress, ++depth);
+                var node = _networkTree.ElementAt((int)nextNodeIndex);
+                if (node.IsLeaf)
+                {
+                    networkIndex = BinaryUtils.EnsureEndianness(node.network);
+                    prefix = depth;
+                }
 
-                AddressUtils.SetAddressBit(networkAddress, depth, bit);
+                if (depth == mappedAddress.Length * 8)
+                {
+                    break;
+                }
 
-                node = _networkTree.ElementAt(nextNodeIndex);
-                nextNodeIndex = (int)BinaryUtils.EnsureEndianness(bit == 0 ? node.zero : node.one);
-            } while (nextNodeIndex > 0);
+                var bit = AddressUtils.GetAddressBit(mappedAddress, depth);
+                if ((nextNodeIndex = BinaryUtils.EnsureEndianness(bit == 0 ? node.zero : node.one)) == 0)
+                {
+                    break;
+                }
 
-            if (!node.IsLeaf)
-            {
-                return null;
+                depth++;
             }
 
-            var networkIndex = BinaryUtils.EnsureEndianness(node.network);
-            return _networks.CreateWithPrefix(networkIndex, networkAddress, depth);
+            return networkIndex.HasValue ? _networks.CreateWithPrefix(networkIndex.Value, mappedAddress, prefix) : null;
         }
 
         public void Dispose()
