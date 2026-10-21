@@ -1,6 +1,7 @@
 ﻿// libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,54 +22,72 @@ namespace libloc.V1
 
         public bool MoveNext()
         {
-            if (!_pendingNetworkStack.TryPop(out var nextNetwork))
+            while (TryTakeNext(out var nextNetwork))
             {
-                // move next in base tree
-                if (!_treeEnumerator.MoveNext())
+                var treeSubnets = new List<IAddressLocatedNetwork>();
+                while (TryTakeNext(out var candidate))
                 {
-                    return false;
+                    if (!nextNetwork.Network.Contains(candidate.Network))
+                    {
+                        _pendingNetworkStack.Push(candidate);
+                        break;
+                    }
+
+                    treeSubnets.Add(candidate);
                 }
 
-                nextNetwork = _treeEnumerator.Current!;
+                if (treeSubnets.Count == 0)
+                {
+                    Current = nextNetwork;
+                    return true;
+                }
+
+                var gaps = new List<IPNetwork2> { nextNetwork.Network };
+                foreach (var subnet in IPNetwork2.Supernet(treeSubnets.Select(network => network.Network).ToArray()))
+                {
+                    gaps = gaps.SelectMany(network => network.Subtract(subnet)).ToList();
+                }
+
+                treeSubnets.AddRange(gaps.Select(network => new DatabaseNetwork(network, nextNetwork.CountryCode, nextNetwork.ASN, nextNetwork.Flags)));
+                treeSubnets.Sort((left, right) =>
+                {
+                    var comparison = left.Network.Network.GetAddressBytes().AsSpan().SequenceCompareTo(right.Network.Network.GetAddressBytes());
+                    return comparison != 0 ? comparison : left.Network.Cidr.CompareTo(right.Network.Cidr);
+                });
+
+                for (var index = treeSubnets.Count - 1; index >= 0; index--)
+                {
+                    _pendingNetworkStack.Push(treeSubnets[index]);
+                }
             }
 
-            // walk the tree to create a list of subnets
-            var treeSubnets = new List<IPNetwork2>();
+            Current = null;
+            return false;
+        }
 
-            while (_treeEnumerator.MoveNext())
+        private bool TryTakeNext(out IAddressLocatedNetwork network)
+        {
+            if (_pendingNetworkStack.TryPop(out network))
             {
-                if (nextNetwork.Network.Contains(_treeEnumerator.Current!.Network))
-                {
-                    treeSubnets.Add(_treeEnumerator.Current.Network);
-                }
-                else
-                {
-                    _pendingNetworkStack.Push(_treeEnumerator.Current);
-                    break;
-                }
-            }
-
-            // can stop here if there are no subnets associated with this network
-            if (!treeSubnets.Any())
-            {
-                Current = nextNetwork;
                 return true;
             }
 
-            // combine all networks and get the gaps created as well...
-            var nets = IPNetwork2.Supernet(treeSubnets.ToArray());
-            foreach (var network in nets)
+            if (_treeEnumerator.MoveNext())
             {
-                _pendingNetworkStack.Push(new DatabaseNetwork(network, nextNetwork.CountryCode, nextNetwork.ASN, nextNetwork.Flags));
+                network = _treeEnumerator.Current;
+                return true;
             }
 
-            return MoveNext();
+            network = null;
+            return false;
         }
 
         public void Reset()
         {
             _treeEnumerator.Reset();
             _pendingNetworkStack.Clear();
+
+            Current = null;
         }
 
         public IAddressLocatedNetwork Current { get; private set; }

@@ -1,6 +1,7 @@
 // libloc-sharp - A version of IPFire's libloc library rewritten for .NET
 // Licensed under LGPL-2.1 - see the license file for more information
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Net.Sockets;
@@ -81,6 +82,9 @@ namespace libloc.V1
         {
             _visitedNetworks.Clear();
             _networkStack.Clear();
+
+            Current = null;
+            Array.Clear(_networkAddress, 0, _networkAddress.Length);
 
             _networkStack.Push(new NodeStackItem(0, 0, false));
         }
