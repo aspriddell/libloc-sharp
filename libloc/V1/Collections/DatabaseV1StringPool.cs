@@ -3,8 +3,9 @@
 
 using System;
 using System.IO.MemoryMappedFiles;
-using System.Runtime.InteropServices;
+using System.Text;
 using libloc.Abstractions;
+using libloc.Exceptions;
 
 namespace libloc.V1.Collections
 {
@@ -15,6 +16,11 @@ namespace libloc.V1.Collections
         internal DatabaseV1StringPool(MemoryMappedViewAccessor sourcePool)
         {
             _sourcePool = sourcePool;
+
+            if (_sourcePool.Capacity == 0 || _sourcePool.ReadByte(_sourcePool.Capacity - 1) != 0)
+            {
+                throw new FileFormatException("The string pool is not terminated");
+            }
         }
 
         public void Dispose()
@@ -26,14 +32,27 @@ namespace libloc.V1.Collections
 
         private unsafe string GetInternal(uint offset)
         {
+            var correctedOffset = BinaryUtils.EnsureEndianness(offset);
+            if (correctedOffset >= _sourcePool.Capacity)
+            {
+                throw new FileFormatException("The string offset is outside the string pool");
+            }
+
             byte* ptr = null;
 
             _sourcePool.SafeMemoryMappedViewHandle.AcquirePointer(ref ptr);
 
             try
             {
-                var correctedOffset = BinaryUtils.EnsureEndianness(offset);
-                return Marshal.PtrToStringUTF8((IntPtr)ptr + (int)(_sourcePool.PointerOffset + correctedOffset));
+                var remaining = (int)Math.Min(_sourcePool.Capacity - correctedOffset, int.MaxValue);
+                var bytes = new ReadOnlySpan<byte>(ptr + _sourcePool.PointerOffset + correctedOffset, remaining);
+                var length = bytes.IndexOf((byte)0);
+                if (length < 0)
+                {
+                    throw new FileFormatException("The string is not terminated within the supported length");
+                }
+
+                return Encoding.UTF8.GetString(bytes.Slice(0, length));
             }
             finally
             {
