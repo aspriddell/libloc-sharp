@@ -38,6 +38,8 @@ namespace libloc.V1.Collections
             Span<byte> bitmask = stackalloc byte[v6AddressBytes.Length];
             Span<byte> firstAddressBytes = stackalloc byte[v6AddressBytes.Length];
 
+            bitmask.Clear();
+
             for (int i = prefix, j = 0; i > 0; i -= 8, j++)
             {
                 bitmask[j] = i >= 8 ? (byte)0xff : (byte)(0xff << (8 - i));
