@@ -8,8 +8,8 @@ using System.IO.MemoryMappedFiles;
 using System.Net;
 using System.Net.Sockets;
 using libloc.Abstractions;
+using libloc.Exceptions;
 using libloc.V1.Collections;
-using libloc.V1.Source;
 
 namespace libloc.V1
 {
@@ -42,21 +42,36 @@ namespace libloc.V1
 
             CreatedAt = DateTimeOffset.FromUnixTimeSeconds((long)BinaryUtils.EnsureEndianness(header.created_at));
 
-            // create object views
-            var networkTreeView = mmdb.CreateViewAccessor(BinaryUtils.EnsureEndianness(header.network_tree_offset), BinaryUtils.EnsureEndianness(header.network_tree_length), MemoryMappedFileAccess.Read);
-            _networkTree = new DatabaseV1NetworkTree(networkTreeView);
+            if (header.pool_length == 0)
+            {
+                throw new FileFormatException("The string pool is empty");
+            }
 
-            var stringPoolView = mmdb.CreateViewAccessor(BinaryUtils.EnsureEndianness(header.pool_offset), BinaryUtils.EnsureEndianness(header.pool_length), MemoryMappedFileAccess.Read);
-            _stringPool = new DatabaseV1StringPool(stringPoolView);
+            var views = new List<MemoryMappedViewAccessor>();
+            try
+            {
+                _networkTree = new DatabaseV1NetworkTree(CreateView(header.network_tree_offset, header.network_tree_length));
+                _stringPool = new DatabaseV1StringPool(CreateView(header.pool_offset, header.pool_length));
+                _as = new DatabaseV1AS(CreateView(header.as_offset, header.as_length), _stringPool);
+                _networks = new DatabaseV1Networks(CreateView(header.network_data_offset, header.network_data_length));
+                _countries = new DatabaseV1Countries(CreateView(header.countries_offset, header.countries_length), _stringPool);
+            }
+            catch
+            {
+                foreach (var view in views)
+                {
+                    view.Dispose();
+                }
 
-            var asView = mmdb.CreateViewAccessor(BinaryUtils.EnsureEndianness(header.as_offset), BinaryUtils.EnsureEndianness(header.as_length), MemoryMappedFileAccess.Read);
-            _as = new DatabaseV1AS(asView, _stringPool);
+                throw;
+            }
 
-            var networksView = mmdb.CreateViewAccessor(BinaryUtils.EnsureEndianness(header.network_data_offset), BinaryUtils.EnsureEndianness(header.network_data_length), MemoryMappedFileAccess.Read);
-            _networks = new DatabaseV1Networks(networksView);
-
-            var countryView = mmdb.CreateViewAccessor(BinaryUtils.EnsureEndianness(header.countries_offset), BinaryUtils.EnsureEndianness(header.countries_length), MemoryMappedFileAccess.Read);
-            _countries = new DatabaseV1Countries(countryView, _stringPool);
+            MemoryMappedViewAccessor CreateView(uint offset, uint length)
+            {
+                var view = mmdb.CreateViewAccessor(BinaryUtils.EnsureEndianness(offset), BinaryUtils.EnsureEndianness(length), MemoryMappedFileAccess.Read);
+                views.Add(view);
+                return view;
+            }
         }
 
         public int Version => 1;
@@ -110,6 +125,9 @@ namespace libloc.V1
         {
             _stringPool.Dispose();
             _countries.Dispose();
+            _as.Dispose();
+            _networks.Dispose();
+            _networkTree.Dispose();
 
             _mmdb.Dispose();
         }
