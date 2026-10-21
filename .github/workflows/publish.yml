@@ -16,6 +16,11 @@ jobs:
             6.0.x
             8.0.x
             10.0.x
+            
+      - id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ secrets.NUGET_USER }}
 
       - name: Restore
         run: dotnet restore
@@ -32,4 +37,4 @@ jobs:
         if: "!github.event.release.prerelease"
 
       - name: Publish
-        run: dotnet nuget push "*.nupkg" -k ${{ secrets.NUGET_KEY }} --skip-duplicate -s https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "*.nupkg" -k ${{ steps.login.outputs.NUGET_API_KEY }} --skip-duplicate -s https://api.nuget.org/v3/index.json
