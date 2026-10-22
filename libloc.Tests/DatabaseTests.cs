@@ -2,6 +2,7 @@
 // Licensed under LGPL-2.1 - see the license file for more information
 
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -73,6 +74,16 @@ namespace libloc.Tests
 
             Assert.That(asInfo, Is.Not.Null);
             Assert.That(asInfo.Name, Is.Not.Empty);
+        }
+
+        [Test]
+        public async Task NetworkCollectionCountMatchesTotalEnumerated()
+        {
+            var database = TestServices.Services.GetRequiredService<ILocationDbAccessor>();
+            var expected = await database.PerformAsync(db => db.Networks.Count);
+            var enumerated = await database.PerformAsync(db => db.Networks.Count());
+
+            Assert.That(enumerated, Is.EqualTo(expected));
         }
     }
 }
