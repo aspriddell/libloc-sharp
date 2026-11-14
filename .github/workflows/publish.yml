@@ -20,6 +20,7 @@ jobs:
             6.0.x
             8.0.x
             10.0.x
+            11.0.x
             
       - id: login
         uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
