@@ -31,7 +31,7 @@ jobs:
         run: dotnet restore
 
       - name: Build
-        run: dotnet build -c Release -v normal -p:Version=${{ github.event.release.tag_name }}
+        run: dotnet build -c Release -v normal -p:Version=${{ github.event.release.tag_name }} -p:ContinuousIntegrationBuild=true
 
       - name: Pack (Beta)
         run: dotnet pack -c Release --no-build -o . -p:PackageVersion=${{ github.event.release.tag_name }}-beta
