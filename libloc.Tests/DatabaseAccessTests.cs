@@ -13,7 +13,7 @@ using NUnit.Framework;
 
 namespace libloc.Tests
 {
-    public class Tests
+    public class DatabaseAccessTests
     {
         [OneTimeSetUp]
         public async Task Setup()
